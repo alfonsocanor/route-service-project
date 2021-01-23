@@ -24,7 +24,7 @@ app.use(bodyParser.json());
 app.listen(3000, () => {
     console.log('route-service on port 3000');
 });*/
-const geoinfo = require('./api/routes/geoinfo');
+//const geoinfo = require('./api/routes/geoinfo');
 const routing = require('./api/routes/routing');
 /* app.use((req, res, next) => {
     res.status(200).json({
@@ -32,6 +32,6 @@ const routing = require('./api/routes/routing');
     });
 }); */
 
-app.use('/geoinfo', geoinfo);
+//app.use('/geoinfo', geoinfo);
 app.use('/routing', routing)
 module.exports = app;

@@ -1,5 +1,5 @@
 const http = require('http');
-const app = require('/app');
+const app = require('./app');
 var { port } = require('./config');
 
 const server = http.createServer(app);
