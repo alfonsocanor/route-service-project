@@ -1,8 +1,9 @@
-FROM node:15.0.1-slim
+FROM node:15.6.0-alpine3.10
+RUN apk add g++ make python
+ENV PORT=3105
 WORKDIR /app
-COPY package.json /app
-RUN npm install -g --force nodemon  
-RUN npm install
+COPY ["package.json", "yarn-lock.json*", "./"]
+RUN yarn install
 COPY . /app
-EXPOSE 3000
-CMD ["npm", "start"]
+EXPOSE 3105
+CMD ["yarn", "start"]
