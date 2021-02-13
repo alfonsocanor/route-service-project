@@ -11,15 +11,7 @@ router.get('/getAllLatLon', (req, res, next) => {
     console.log('routeInformation: ' , AddresArrayMock);
     const AddressArray = [
         { clientId: '1', clientName: 'James Jhonson', address: 'Arevalo 2024 C1414 CABA'},
-        { clientId: '2', clientName: 'Alice Connor', address: 'Thames 1101 C1414 DCW Buenos Aires'}/*,
-        'Av. Corrientes 5436, C1414 CABA',
-        'Arenales 2932, C1425 Begno, Buenos Aires',
-        'Gral. Lucio Norberto Mansilla 3643, C1425 BPW, Buenos Aires',
-        'Cap. Gral. Ramon Freire 1101, C1426 AVW, Buenos Aires',
-        'Av. Federico Lacroze 3455, C1426 CABA',
-        'Av. Guzman 302, C1427 BOQ, Buenos Aires',
-        'Av. Cnel. Niceto Vega 5510, C1414BFD CABA',
-        'Mario Bravo 1050, C1175 ABT, Buenos Aires' */
+        { clientId: '2', clientName: 'Alice Connor', address: 'Thames 1101 C1414 DCW Buenos Aires'}
     ];
 
     let latlgnArray = [];
@@ -37,13 +29,12 @@ router.get('/getAllLatLon', (req, res, next) => {
         var testArray = [];
         for(index in results){
             parseString(results[index],function (err, result) {
-                //console.log('RESUL: ' , );//.GeocodeResponse);
                 testArray.push({
                     id: AddressArray[index].clientId,
                     clientName: AddressArray[index].clientName,
                     lat: result.GeocodeResponse.result[0].geometry[0].location[0].lat[0],
                     lng: result.GeocodeResponse.result[0].geometry[0].location[0].lng[0]
-                });//result.GeocodeResponse.result[0].geometry[0].location[0].lat[0]
+                });
             })
         }
         res.send(testArray);
@@ -69,17 +60,6 @@ router.get('/getSingleLanLon', (req, res, next) => {
                 });
         }
     })
-
-/*     fetch('https://nominatim.openstreetmap.org/search?q=santa+rosa+5040+buenos+aires+caba+argentina&format=json&polygon=1&addressdetails=1')
-    .then(resp => {
-        console.log('resp: ' + resp);
-        res.status(200).json({
-            message: resp
-        });
-    })
-    .catch(error => {
-        console.log('error: ' , error);
-    }); */
 });
 
 module.exports = router;

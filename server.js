@@ -4,5 +4,6 @@ var { port } = require('./config');
 
 const server = http.createServer(app);
  
-port = process.env.PORT || 3000;
+port = process.env.PORT || 3111;
+console.log(port);
 server.listen(port);
