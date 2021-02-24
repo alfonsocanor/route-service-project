@@ -1,7 +1,12 @@
 const express = require('express');
 const request = require('request');
+var jsonValidator = require('jsonschema').Validator;
+var bodyParser = require('body-parser');
 const { route } = require('./geoinfo');
 const router = express.Router();
+
+var validator = new jsonValidator();
+validator.addSchema(locationsSchema, '/Locations');
 
 router.get('/calculateBestRouteByDistance', (req, res, next) => {
     var locations = 
@@ -11,6 +16,15 @@ router.get('/calculateBestRouteByDistance', (req, res, next) => {
         {accountId: 'AAAA', lat: -34.5831321, lng: -58.4284932 },
         {accountId: 'CCCC', lat: -34.5714363, lng: -58.4464747 }
     ];
+
+    try {
+        validator.validate(locations, locationsSchema, {
+            throwError: true
+        });
+    } catch (error) {
+        res.status(401).end('Invalid body format: ' + error.message);
+        return;
+    }
       
     var allCoordinates = 'http://router.project-osrm.org/table/v1/driving/';
     
@@ -21,6 +35,13 @@ router.get('/calculateBestRouteByDistance', (req, res, next) => {
 
     console.log('allCoordinates: ' + allCoordinates);
     request(allCoordinates, function (error, response, body) {
+        if(response.statusCode == 503){
+            res.status(503).json({
+                error: '503 OSRM Service Unavailable: Apache/2.4.38 (Debian) Server at router.project-osrm.org Port 80'
+            });  
+            return; 
+        }
+
         console.log(Object.keys(JSON.parse(response.body)));
         if (!error && response.statusCode == 200) {
             var distances = JSON.parse(response.body).distances;
@@ -39,18 +60,33 @@ router.get('/calculateBestRouteByDistance', (req, res, next) => {
 });
 
 router.post('/calculateRouteByDistance', (req, res, next) => {
-    console.log('BODY: ' , req.body);
     var locations = req.body;
+
+    if(res.statusCode == 503){
+        res.status(503).json({
+            error: '503 OSRM Service Unavailable: Apache/2.4.38 (Debian) Server at router.project-osrm.org Port 80'
+        });  
+        return; 
+    }
+
+    try {
+        validator.validate(locations, locationsSchema, {
+            throwError: true
+        });
+    } catch (error) {
+        res.status(401).end('Invalid body format: ' + error.message);
+        return;
+    }
 
     //Endpoint form
     //'http://router.project-osrm.org/table/v1/driving/-58.4284932,-34.5831321;-58.4344584,-34.5779381;-58.4464747,-34.5714363;-58.4599501,-34.5610818;?annotations=distance';
     var allCoordinates = 'http://router.project-osrm.org/table/v1/driving/';
-    
+
     for(locationIndex in locations){
         allCoordinates = allCoordinates + locations[locationIndex].lng + ',' + locations[locationIndex].lat + ';';
     }
     allCoordinates = allCoordinates.slice(0, -1) + '?annotations=distance';
-  
+
     request(allCoordinates, function (error, response, body) {
         console.log(Object.keys(JSON.parse(response.body)));
         if (!error && response.statusCode == 200) {
@@ -126,4 +162,20 @@ function troudAlgorithmPoweredByOSRM(locations){
     console.log(route);
     return route;
 }
+
+var locationsSchema = {
+    type: 'array',
+    "items": {
+        properties: {
+            lat: {
+                type: 'number'
+            },
+            lng: {
+                type: 'number'
+            }
+        },
+        required: ['lat', 'lng']
+    }
+};
+
 module.exports = router;
